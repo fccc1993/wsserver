@@ -22,7 +22,10 @@ Welcome
     var websocket = null;
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://localhost:8080/server/websocket");
+        websocket = new WebSocket("wss://riveng2-sht.gw.riven.panda.tv:8080/");
+       
+//        websocket = new WebSocket("ws://acs.m.taobao.com:80/accs/auth?token=" +
+//            "AAABWiEJf0iJOXK3wUquiM7lHJ4TuJKf9iJ3cbgFzz/KTyPVYAe0R3rBcKZex3TjZNiFUuoYPmaKuS3Znj42i7v/iRsao6A=");
     }
     else {
         alert('当前浏览器 Not support websocket')
@@ -67,6 +70,9 @@ Welcome
     function send() {
         var message = document.getElementById('text').value;
         websocket.send(message);
+        var input = document.getElementById('text');
+        input.select();
+        document.selection.clear();
     }
 </script>
 </html>
