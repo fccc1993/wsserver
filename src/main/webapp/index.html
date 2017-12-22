@@ -22,10 +22,21 @@ Welcome
     var websocket = null;
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("wss://riveng2-sht.gw.riven.panda.tv:8080/");
-       
-//        websocket = new WebSocket("ws://acs.m.taobao.com:80/accs/auth?token=" +
-//            "AAABWiEJf0iJOXK3wUquiM7lHJ4TuJKf9iJ3cbgFzz/KTyPVYAe0R3rBcKZex3TjZNiFUuoYPmaKuS3Znj42i7v/iRsao6A=");
+//        websocket = new WebSocket("http://ipservice.mogujie.com/ipservice?func=feedback&type=serverdelay&ua=android&did=862452030862031&version=10.2.0.8719");
+//        websocket = new WebSocket("ws://localhost:8080/server/websocket");
+        parent.location.href="https://www.panda.tv/";
+        var cookies = document.cookie;
+        console.log(cookies);
+        websocket = new WebSocket("wss://riveng7-sht.gw.riven.panda.tv:8080/");
+        websocket.setRequestHeader(["Host"],["riveng7-sht.gw.riven.panda.tv:8080"]);
+        websocket.setRequestHeader(["Sec-WebSocket-Key"],["YBRXIuy+/DPVQKvoPFBz1A=="]);
+        websocket.setRequestHeader(["Sec-WebSocket-Extensions"],["permessage-deflate; client_max_window_bits"]);
+        websocket.setRequestHeader(["Origin"],["https://www.panda.tv"]);
+        websocket.setRequestHeader(["Connection"],["Upgrade"]);
+        websocket.setRequestHeader(["Upgrade"],["websocket"]);
+        websocket.setRequestHeader(["Sec-WebSocket-Version"],["13"]);
+        websocket.setRequestHeader(["Cookie"],[cookies]);
+        websocket = new WebSocket("wss://acs.m.taobao.com:80/accs/auth?token=AAACWifQ/E2Z58VFBNFxQzNp2DSFt524G+v8CXnT0Y9ruwxTsFf5kMEE587gXhY1dwCqD4Mhby46IgjyYh4udRIH/Sojt3M=");
     }
     else {
         alert('当前浏览器 Not support websocket')

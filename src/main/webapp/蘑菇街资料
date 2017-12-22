@@ -1,0 +1,94 @@
+
+运行命令 
+
+phantomJs --web-security=no mogujie.js 13ecqc2
+
+phantomJs --web-security=no mogujie.js 主播id
+
+h5  直播页面
+ http://h5.mogujie.com/mgj-live/share.html?actorId=16a9u5m
+
+actorId 可通过 分享 主播个人页面 得到
+
+主播个人页面url
+
+http://h5.mogujie.com/profile/index.html?
+uid=189da0e      ====》这个值
+&tab=1
+&_fu=1937svo&_mgjuuid=A6CE655E-734C-4DD8-973F-AF558ED4B680
+&f=copy&fu=1937svo&popself=1
+&ptp=am0.vqont7cw.0.0.8DFrIl3
+&s=NIMAppStore1013
+
+
+消息类型  messageType
+
+
+    TEXT: 1,
+    IMAGE: 2,
+    VOICE: 3,
+    EMOTION: 4,
+    COMBINE: 5,
+    BONUS: 11,
+    GIFTS: 12,
+    GIFT_SUBTYPE: {
+        Charges: 1,
+        Cash: 2,
+        Free: 3,
+        Promote: 4,
+        Danmu: 5,
+        HostThanks: 100,
+        OfficialGift: 6
+    },
+    GIFT_ANIMATE_TYPE: {
+        None: 0,
+        Flower: 1,
+        Gif: 2,
+        HostThanks: 3
+    },
+    LIKE: 21,
+    JOIN_ROOM: 31,  进房剁手
+    QUIT_ROOM: 32,
+    OFFICIAL_PUSH_DEPRECATED: 41,
+    ACTOR_BUSY: 42,
+    ACTOR_BUSY_SUBTYPE: {
+        HOST_BUSY: 1,
+        HOST_RECOVER: 2
+    },
+    RTMP_RECONNECT: 44,
+    OFFICIAL_PUSH: 45,
+    OFFICIAL_PUSH_SUBTYPE: {
+        All: 1,
+        Audience: 2,
+        Actor: 3
+    },
+    ASSISTANT: 51,
+    ASSISTANT_SUBTYPE: {
+        Shutup: 1,
+        Giveup: 2,
+        UpdateGoods: 3,
+        SetMainGoods: 4,
+        LeaveRoom: 5
+    },
+    AUDIENCE_ACTIVITY: 52,
+    AUDIENCE_ACTIVITY_SUBTYPE: {
+        ScreenShot: 1,   截图合影
+        FocusActor: 2,  关注主播 type = 2
+        Share: 3       分享
+    },
+    AUDIENCE_ACTIVITY_SHARE_TYPE: {
+        QQ: "qq",
+        QQ_ZONE: "qzone",
+        WECHAT: "weixinFriend",
+        WECHAT_TIMELINE: "weixinFriendQuan",
+        SINAWB: "sinaWB"
+    },
+    GOODS_COUPON: 53,
+    ADD_CART: 54,
+    BUY_GOODS: 55,
+    LIKE_FANATICS: 56,
+    ANONYMOUS_JOIN_ROOM: 57,
+    ACTOR_CLOSE_LIVE: 58,
+    WINNING_PRIZE: 59,
+    CHOUBAOBAO_RESULT: 61,
+    LOCAL_NOTICE: 120
