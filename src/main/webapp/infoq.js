@@ -5,9 +5,10 @@ var mwp_h5_token;
 var mwp_h5_token_enc;
 var mgjuuid;
 var actorLiveInfoServiceUrl;
+var visitorIn4H5ServiceUrl;
+var playbackServiceUrl;
 
 var webpage = require('webpage').create();
-
 webpage.onResourceRequested = function (requestData, networkRequest) {
     // console.log("requestData.url:"+requestData.url);
     ///////////////////////////====拦截这个接口  取出url 方便后面模拟请求====//////////////////////////////
@@ -15,9 +16,13 @@ webpage.onResourceRequested = function (requestData, networkRequest) {
         actorLiveInfoServiceUrl = requestData.url;
     }
 
-    // if (requestData.url.indexOf("http://newpreapi.mogujie.com/h5/mwp.member.userinfo/1.5/") > -1) {
-    //     actorLiveInfoServiceUrl = requestData.url;
-    // }
+    if (requestData.url.indexOf("http://api.mogujie.com/h5/mwp.mogulive.visitorIn4H5Service/1") > -1) {
+        visitorIn4H5ServiceUrl = requestData.url;
+    }
+
+    if (requestData.url.indexOf("http://api.mogujie.com/h5/mwp.mogulive.playbackService/1") > -1) {
+        playbackServiceUrl = requestData.url;
+    }
 };
 window.setTimeout(function () {
     // var content3 = webpage.evaluate(function () {
@@ -35,7 +40,9 @@ window.setTimeout(function () {
             mwp_h5_token = cookies[i].value;
         }
     }
-    console.log("actorLiveInfoServiceUrl:" + actorLiveInfoServiceUrl);
+    // console.log("visitorIn4H5ServiceUrl:" + visitorIn4H5ServiceUrl);
+    // console.log("actorLiveInfoServiceUrl:" + actorLiveInfoServiceUrl);
+    // console.log("playbackServiceUrl:" + playbackServiceUrl);
     ///////////////////////////  以下逻辑 不必用js 写  可以 得到cookies 和 url 后用你java或者node 后台模拟请求    ////////////////////////////////////////////////
 
     // 一共三个接口 来获取 消息
@@ -51,45 +58,52 @@ window.setTimeout(function () {
     // "onlineUserCount":23413
     // ===============================
 
-    var xhrf = new XMLHttpRequest();
-    var infourl2 = "http://newpreapi.mogujie.com/h5/mwp.member.userinfo/1.5/?mw-appkey=100028&mw-t=1513912382677&mw-ttid=NMMain%40mgj_h5_1.0&data=%7B%22uid%22%3A%22185f5ks%22%2C%22appPlat%22%3A%22m%22%7D&mw-sign=91a82b1f7a588858246f629c26a1cf8b&_=1513912382678";
-    var infourl = "http://api.mogujie.com/h5/mwp.mogulive.visitorIn4H5Service/1/?mw-appkey=100028&mw-t=1513937676389&mw-ttid=NMMain%40mgj_h5_1.0&mw-sign=8b95bcb74cc8316f8e47679bf7138770&data=%7B%22liveId%22%3A%221cbkeg%22%2C%22appPlat%22%3A%22h5%22%7D&_=1513937676391";
-    xhrf.webSecutiry = false;
-    xhrf.localToRemoteUrlAccessEnabled = true;
-    xhrf.open("GET", infourl2, true);
-    console.log(infourl);
-    xhrf.setRequestHeader("Cookie", "_mwp_h5_token_enc=" + mwp_h5_token_enc + ";_mwp_h5_token=" + mwp_h5_token + ";__mgjuuid=" + mgjuuid + ";");
-    xhrf.setRequestHeader("Referer", "http://h5.mogujie.com/mgj-live/share.html?actorId=13ecqc2");
-    xhrf.onreadystatechange = function () {
-        if (xhrf.readyState == 4) {
-            if (xhrf.status == 200) {
-                console.log("---------------------"+xhrf.responseText.substring(0,xhrf.responseText.length-1));
-                var jstr = xhrf.responseText.substring(0,xhrf.responseText.length-1);
-                var json = JSON.parse(jstr);
-                console.log(json.data.clikes);
-                console.log("点赞数: "+json.data.liveInfo.favorCount);
-            }
-        }
-    }
-    xhrf.send(null);
     //////////////==【接口一】==///////////////=====获取房间信息====取出GroupId用于下个接口==/////////////////////////////////
-    var xhr = new XMLHttpRequest();
-    xhr.webSecutiry = false;
-    xhr.localToRemoteUrlAccessEnabled = true;
-    xhr.open("GET", actorLiveInfoServiceUrl, true);
-    xhr.setRequestHeader("Cookie", "_mwp_h5_token_enc=" + mwp_h5_token_enc + ";_mwp_h5_token=" + mwp_h5_token + ";__mgjuuid=" + mgjuuid + ";");
-    xhr.setRequestHeader("Referer", "http://h5.mogujie.com/mgj-live/share.html?actorId=13ecqc2");
+    var actorLiveInfoService = new XMLHttpRequest();
+    actorLiveInfoService.webSecutiry = false;
+    actorLiveInfoService.localToRemoteUrlAccessEnabled = true;
+    actorLiveInfoService.open("GET", actorLiveInfoServiceUrl, true);
+    actorLiveInfoService.setRequestHeader("Cookie", "_mwp_h5_token_enc=" + mwp_h5_token_enc + ";_mwp_h5_token=" + mwp_h5_token + ";__mgjuuid=" + mgjuuid + ";");
+    actorLiveInfoService.setRequestHeader("Referer", "http://h5.mogujie.com/mgj-live/share.html?actorId=13ecqc2");
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-                var jsonstring = xhr.responseText.substring(7, xhr.responseText.length - 1);
+    actorLiveInfoService.onreadystatechange = function () {
+        if (actorLiveInfoService.readyState == 4) {
+            if (actorLiveInfoService.status == 200) {
+                var jsonstring = actorLiveInfoService.responseText.substring(7, actorLiveInfoService.responseText.length - 1);
                 var json = JSON.parse(jsonstring);
 
-                //  console.log('json:'+jsonstring);
                 if (json.ret == "SUCCESS") {
+                    // console.log("actorInfo:{\"liveId\":" + json.data.roomIdString + ",\"uid\":" + json.data.actorInfo.uid + ",\"roomId\":" + json.data.roomId + ",\"uname\":" + json.data.actorInfo.uname + "}");
+
                     if (json.data.liveStatus == 1) {
-                        console.log('[top]直播中');
+                        console.log('liveStatus == 1');
+
+                        var visitorIn4H5Service = new XMLHttpRequest();
+
+                        function interval() {
+                            visitorIn4H5Service.webSecutiry = false;
+                            visitorIn4H5Service.localToRemoteUrlAccessEnabled = true;
+                            visitorIn4H5Service.open("GET", visitorIn4H5ServiceUrl, true);
+                            visitorIn4H5Service.setRequestHeader("Cookie", "_mwp_h5_token_enc=" + mwp_h5_token_enc + ";_mwp_h5_token=" + mwp_h5_token + ";__mgjuuid=" + mgjuuid + ";");
+                            visitorIn4H5Service.setRequestHeader("Referer", "http://h5.mogujie.com/mgj-live/share.html?actorId=13ecqc2");
+
+                            visitorIn4H5Service.onreadystatechange = function () {
+                                if (visitorIn4H5Service.readyState == 4) {
+                                    if (visitorIn4H5Service.status == 200) {
+                                        var jstr = visitorIn4H5Service.responseText.substring(7, visitorIn4H5Service.responseText.length - 1);
+                                        var json = JSON.parse(jstr);
+                                        if (json.ret == "SUCCESS") {
+                                            console.log("actorInfo:{\"liveId\":" + json.data.liveInfo.liveId + ",\"roomId\":" + json.data.liveInfo.liveIdNum + ",\"intro\":" + json.data.liveInfo.intro + ",\"uid\":" + json.data.actorInfo.actUserId + ",\"uname\":" + json.data.actorInfo.actorName + "}");
+                                            console.log("onlineUser:{\"favorCount\":" + json.data.liveInfo.favorCount + ",\"onlineUserCount\":" + json.data.onlineUserCount + "}\n");
+                                        }
+                                    }
+                                }
+                            }
+                            visitorIn4H5Service.send(null);
+                        }
+
+                        interval();
+                        window.setInterval(interval, 60000)
                         var GroupId = json.data.groupId;
                         ////////==【接口二】==/////////////用于获取key 获取消息时用/////////////////////////////
 
@@ -101,7 +115,7 @@ window.setTimeout(function () {
                         xhr2.onreadystatechange = function () {
                             if (xhr2.readyState == 4) {
                                 if (xhr2.status == 200) {
-                                    // console.log('json:'+xhr2.responseText);
+                                    console.log('json:' + xhr2.responseText);
                                     var json = JSON.parse(xhr2.responseText);
                                     if (json.ActionStatus == 'OK') {
                                         var LongPollingKey = json.LongPollingKey;
@@ -119,13 +133,10 @@ window.setTimeout(function () {
                                             xhr3.onreadystatechange = function () {
                                                 if (xhr3.readyState == 4) {
                                                     if (xhr3.status == 200) {
-                                                        // console.log('json:'+xhr3.responseText);
                                                         var json = JSON.parse(xhr3.responseText);
                                                         if (json.ActionStatus == 'OK') {
                                                             var NextSeq = json.NextSeq;
                                                             StartSeq = NextSeq;
-                                                            //////////////////////////////////////////////////
-                                                            // console.log('[top]'+xhr3.responseText);
                                                             var RspMsgList = json.RspMsgList;
                                                             for (var i = 0; i < RspMsgList.length; i++) {
                                                                 var list = RspMsgList[i];
@@ -135,16 +146,10 @@ window.setTimeout(function () {
                                                                         var list2 = MsgBody[j];
                                                                         var MsgContent = list2.MsgContent;
                                                                         var Data = MsgContent.Data;
-                                                                        console.log('[top]' + Data + "\n");
-                                                                        return '[top]' + Data + "\n";
+                                                                        console.log("message:" + Data + "\n");
                                                                     }
-
-
                                                                 }
                                                             }
-                                                            //////////////////////////////////////////////////
-
-
                                                         } else {
                                                             console.log('[top]' + xhr3.responseText);
                                                             console.log('[top]消息接口异常重试');
@@ -154,7 +159,6 @@ window.setTimeout(function () {
                                                 }
                                             };
                                             var postbody = '{"StartSeq": ' + StartSeq + ',"HoldTime": 90,"Key": "' + LongPollingKey + '"}';
-                                            // console.log('[top]postbody:'+postbody);
                                             xhr3.send(postbody);
                                         }, 1000);
                                     }
@@ -164,14 +168,41 @@ window.setTimeout(function () {
 
                         xhr2.send('{"GroupId": "' + GroupId + '"}');
                     } else {
-                        console.log('[top]直播结束');
-                        phantom.exit();
+
+                        // var playbackService = new XMLHttpRequest();
+                        // playbackService.webSecutiry = false;
+                        // playbackService.localToRemoteUrlAccessEnabled = true;
+                        // playbackService.open("GET", playbackServiceUrl, true);
+                        // playbackService.setRequestHeader("Cookie", "_mwp_h5_token_enc=" + mwp_h5_token_enc + ";_mwp_h5_token=" + mwp_h5_token + ";__mgjuuid=" + mgjuuid + ";");
+                        // playbackService.setRequestHeader("Referer", "http://h5.mogujie.com/mgj-live/share.html?actorId=13ecqc2");
+                        // playbackService.onreadystatechange = function () {
+                        //     if (playbackService.readyState == 4) {
+                        //         if (playbackService.status == 200) {
+                        //             var jstr = playbackService.responseText.substring(7, playbackService.responseText.length - 1);
+                        //             var json = JSON.parse(jstr);
+                        //             if (json.ret == "SUCCESS") {
+                        //                 console.log("playback:{\"visitorCount\":" + json.data.visitorCount +
+                        //                     ",\"startTime\":" + json.data.videos[0].startTime +
+                        //                     ",\"endTime\":" + json.data.videos[0].endTime +
+                        //                     ",\"duration\":" + json.data.videos[0].duration +
+                        //                     ",\"roomId\":" + json.data.videos[0].liveId +
+                        //                     ",\"uid\":" + json.data.actUserId +
+                        //                     ",\"uname\":" + json.data.actorName +
+                        //                     ",\"avatar\":" + "\"" + json.data.actorAvatar + "\"" +
+                        //                     "}");
+                        //             }
+                        //             phantom.exit();
+                        //         }
+                        //     }
+                        // }
+                        // playbackService.send(null);
+
+                        console.log('liveStatus == 3');
                     }
                 } else {
-                    console.log('[top]直播结束');
+                    console.log('liveStatus == 3');
                     phantom.exit();
                 }
-
             } else {
                 console.log('[top]异常重试');
                 phantom.exit();
@@ -179,23 +210,13 @@ window.setTimeout(function () {
         }
     };
 
-    xhr.send(null);
+    actorLiveInfoService.send(null);
 }, 5000);
 
 webpage.open("http://h5.mogujie.com/mgj-live/share.html?actorId=" + address, function (status) {
-    console.log('status:' + status);
     if (status !== 'success') {
         console.log('Unable to Post!');
     } else {
         // console.log(webpage.content);
     }
 });
-
-// webpage.open(" http://h5.mogujie.com/profile/index.html?uid="+address+"&tab=1&fu=19zkw6g&f=copy&s=MAMmeizu1020&_fu=19zkw6g&_mgjuuid=862452030862031&ptp=am1.vqont7cw.0.0.2IJhMJs", function (status) {
-//     console.log('status:' + status);
-//     if (status !== 'success') {
-//         console.log('Unable to Post!');
-//     } else {
-//         // console.log(webpage.content);
-//     }
-// });
