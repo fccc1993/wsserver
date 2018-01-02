@@ -1,13 +1,24 @@
 package com.websocket.server;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by fccc on 2017/12/26.
  */
-
+@Document(collection = "liveInfoCount")
+//@CompoundIndexes({
+//        @CompoundIndex(name = "uid_idx", def = "{'uid': 1, 'uname': -1}")
+//})
 public class LiveInfoCount {
+    @Id
+    private String id;
     private int pageviewCount = 0;
     private int activeUserCount = 0;
     private int fansAwakeCount = 0;
@@ -21,10 +32,16 @@ public class LiveInfoCount {
     private int likeCount = 0;
     private int MaxOnlineUserCount = 0;
     private int favorCount = 0;
+    @Indexed
     private String uid;
+    @Indexed
     private String uname;
+    @Indexed
     private String liveId;
     private String intro;
+    private int startTime;
+    private int endTime;
+    private int duration;
     private List<OnlineUser> onlineUserCountList = new ArrayList<OnlineUser>();
 
     @Override
@@ -47,8 +64,43 @@ public class LiveInfoCount {
                 ", uname='" + uname + '\'' +
                 ", liveId='" + liveId + '\'' +
                 ", intro='" + intro + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", duration=" + duration +
                 ", onlineUserCountList=" + onlineUserCountList +
                 '}';
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(int startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(int endTime) {
+        this.endTime = endTime;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 
     public String getIntro() {

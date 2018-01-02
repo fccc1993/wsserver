@@ -8,7 +8,9 @@ public class MessageContent {
     private String userAvatar;
     private String userId;
     private String userName;
+    //剁手次数
     private int chopHandTimes;
+    //发送身份 游客 粉丝 助理
     private int senderMask;
     private int messageType;
     private int personCount;
@@ -16,12 +18,32 @@ public class MessageContent {
     private String sendId;
     private String sendName;
     private int versionCode;
+    //显示内容  弹幕 礼物 剁手等
     private String textContent;
     private String giftName;
     private String imageUrl;
     private int giftType;
-    private boolean expensive;
+    private String expensive;
     private int likeNUm;
+    private String shareType;
+    //messageType-52 下的type
+    private int type;
+
+    public String getShareType() {
+        return shareType;
+    }
+
+    public void setShareType(String shareType) {
+        this.shareType = shareType;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
     public String getTextContent() {
         return textContent;
@@ -55,11 +77,11 @@ public class MessageContent {
         this.giftType = giftType;
     }
 
-    public boolean isExpensive() {
+    public String getExpensive() {
         return expensive;
     }
 
-    public void setExpensive(boolean expensive) {
+    public void setExpensive(String expensive) {
         this.expensive = expensive;
     }
 

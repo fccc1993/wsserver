@@ -5,26 +5,26 @@ package com.websocket.server;
  */
 
 public class OnlineUser {
-    private int favorCount;
+//    private int favorCount;
     private int onlineUserCount;
     private String time;
 
     @Override
     public String toString() {
         return "{" +
-                "favorCount=" + favorCount +
-                ", onlineUserCount=" + onlineUserCount +
+//                "favorCount=" + favorCount +
+                "onlineUserCount=" + onlineUserCount +
                 ", time='" + time + '\'' +
                 '}';
     }
 
-    public int getFavorCount() {
-        return favorCount;
-    }
-
-    public void setFavorCount(int favorCount) {
-        this.favorCount = favorCount;
-    }
+//    public int getFavorCount() {
+//        return favorCount;
+//    }
+//
+//    public void setFavorCount(int favorCount) {
+//        this.favorCount = favorCount;
+//    }
 
     public int getOnlineUserCount() {
         return onlineUserCount;

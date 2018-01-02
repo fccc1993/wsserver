@@ -93,7 +93,8 @@ window.setTimeout(function () {
                                         var jstr = visitorIn4H5Service.responseText.substring(7, visitorIn4H5Service.responseText.length - 1);
                                         var json = JSON.parse(jstr);
                                         if (json.ret == "SUCCESS") {
-                                            console.log("actorInfo:{\"liveId\":" + json.data.liveInfo.liveId + ",\"roomId\":" + json.data.liveInfo.liveIdNum + ",\"intro\":" + json.data.liveInfo.intro + ",\"uid\":" + json.data.actorInfo.actUserId + ",\"uname\":" + json.data.actorInfo.actorName + "}");
+                                            var startTime = Date.parse(new Date()) / 1000;
+                                            console.log("actorInfo:{\"liveId\":" + json.data.liveInfo.liveId + ",\"roomId\":" + json.data.liveInfo.liveIdNum + ",\"intro\":" + json.data.liveInfo.intro + ",\"uid\":" + json.data.actorInfo.actUserId + ",\"uname\":" + json.data.actorInfo.actorName + ",\"tartTime\":" + startTime + "}");
                                             console.log("onlineUser:{\"favorCount\":" + json.data.liveInfo.favorCount + ",\"onlineUserCount\":" + json.data.onlineUserCount + "}\n");
                                         }
                                     }
@@ -103,14 +104,17 @@ window.setTimeout(function () {
                         }
 
                         interval();
-                        window.setInterval(interval, 60000)
+                        window.setInterval(interval, 60000);
                         var GroupId = json.data.groupId;
                         ////////==【接口二】==/////////////用于获取key 获取消息时用/////////////////////////////
 
                         var xhr2 = new XMLHttpRequest();
                         xhr2.webSecutiry = false;
                         xhr2.localToRemoteUrlAccessEnabled = true;
+                        //v3 / v4 改路径同样可能存在更改 参照xhr3的情况
                         xhr2.open("POST", "https://webim.tim.qq.com/v4/group_open_http_svc/apply_join_group?websdkappid=537048168&v=1.7.0&tinyid=144115209675763445&a2=702d49a3dcd98a4639ada755065b26a194e0cc2be87801b7c4177d9b84a0fb3668fef4ef296b2ef6b0d3dc77887038e9281ee76bbdd182f802efdc2b87fa4b623214476a7bf2ebf7&contenttype=json&sdkappid=1400006909&accounttype=3352&apn=1&reqtime=1511947449", true);
+
+                        // xhr2.open("POST","https://webim.tim.qq.com/v3/group_open_http_svc/apply_join_group?websdkappid=537047540&v=1.6.0&tinyid=144115209731866030&a2=99f05ae8c897b421280f65d2353fc17286455fb37f91713aa638996f099211044619f1c3fac2216da67baef53cdb1394e09dd3765429a0e0353caba9716649d3a113c1a0180e45e7&contenttype=json&sdkappid=1400006909&accounttype=3352&apn=1&reqtime=1514429575",true);
 
                         xhr2.onreadystatechange = function () {
                             if (xhr2.readyState == 4) {
@@ -128,7 +132,10 @@ window.setTimeout(function () {
                                             var xhr3 = new XMLHttpRequest();
                                             xhr3.webSecutiry = false;
                                             xhr3.localToRemoteUrlAccessEnabled = true;
-                                            xhr3.open("POST", "https://webim.tim.qq.com/v1/group_open_long_polling_http_noauth_svc/get_msg?websdkappid=537048168&v=1.7.0&tinyid=144115209675763445&a2=82ad95a5d6d7b4855c48ac69a660f04fb34d5ccfbcd7c263eaa389a7084101f7287a06d40b4dbc15ad806a29d1cd8db9349a2d42816dc9e63a1c6e32331772aacf7a434f09eb4777&contenttype=json&sdkappid=1400006909&accounttype=3352&apn=1&reqtime=1511778022", true);
+                                            //v=1.6.0 / v=1.7.0 该路径存在更改的情况，若无法获取消息，查看该路径并修改
+                                            // xhr3.open("POST", "https://webim.tim.qq.com/v1/group_open_long_polling_http_noauth_svc/get_msg?websdkappid=537048168&v=1.7.0&tinyid=144115209675763445&a2=82ad95a5d6d7b4855c48ac69a660f04fb34d5ccfbcd7c263eaa389a7084101f7287a06d40b4dbc15ad806a29d1cd8db9349a2d42816dc9e63a1c6e32331772aacf7a434f09eb4777&contenttype=json&sdkappid=1400006909&accounttype=3352&apn=1&reqtime=1511778022", true);
+
+                                            xhr3.open("POST", "https://webim.tim.qq.com/v1/group_open_long_polling_http_noauth_svc/get_msg?websdkappid=537047540&v=1.6.0&tinyid=144115209731866030&a2=99f05ae8c897b421280f65d2353fc17286455fb37f91713aa638996f099211044619f1c3fac2216da67baef53cdb1394e09dd3765429a0e0353caba9716649d3a113c1a0180e45e7&contenttype=json&sdkappid=1400006909&accounttype=3352&apn=1&reqtime=1514429575", true);
 
                                             xhr3.onreadystatechange = function () {
                                                 if (xhr3.readyState == 4) {
@@ -161,6 +168,8 @@ window.setTimeout(function () {
                                             var postbody = '{"StartSeq": ' + StartSeq + ',"HoldTime": 90,"Key": "' + LongPollingKey + '"}';
                                             xhr3.send(postbody);
                                         }, 1000);
+
+
                                     }
                                 }
                             }

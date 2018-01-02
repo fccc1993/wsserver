@@ -18,7 +18,7 @@ public class JSUtil {
     public static ResultBean liveInfoSpider(String uid) throws IOException {
         Runtime runtime = Runtime.getRuntime();
         //phantomjs 和codes.js的路径之间有个空格 本代码只是测试用的绝对路径
-        Process liveProcess = runtime.exec("D:\\devSoft\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe --web-security=no D:\\devWorkspace\\IdeaProjects\\wsserver\\src\\main\\webapp\\mogujie.js " + uid);
+        Process liveProcess = runtime.exec("D:\\devSoft\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe --web-security=no D:\\devWorkspace\\IdeaProjects\\wsserver\\src\\main\\webapp\\infoq.js " + uid);
         InputStream liveis = liveProcess.getInputStream();
         BufferedReader livebr = new BufferedReader(new InputStreamReader(liveis));
         StringBuffer livebuffer = new StringBuffer();
@@ -26,7 +26,6 @@ public class JSUtil {
         LiveInfoCount liveInfoCount = new LiveInfoCount();
         //各项参数统计初始化
         int pageviewCount = liveInfoCount.getPageviewCount();
-        int fansIncreaseCount = liveInfoCount.getFansIncreaseCount();
         int addCartCount = liveInfoCount.getAddCartCount();
         int buyGoodsCount = liveInfoCount.getBuyGoodsCount();
         int danmakuCount = liveInfoCount.getDanmakuCount();
@@ -35,20 +34,23 @@ public class JSUtil {
         //统计活跃人数，唤醒粉丝数，加购人数，下单人数
         Set<String> activeUserCountSet = new HashSet<String>();
         Set<String> fansAwakeCountCountSet = new HashSet<String>();
+        Set<String> fansIncreaseCountSet = new HashSet<String>();
         Set<String> addCartCountSet = new HashSet<String>();
         Set<String> buyGoodsCountSet = new HashSet<String>();
+
+        MongodbUtil mongodbUtil = new MongodbUtil();
 
         String livetmp = "";
         while ((livetmp = livebr.readLine()) != null) {
             livebuffer.append(livetmp);
             String livetmpstr = livebuffer.toString();
-            System.out.println(livetmpstr);
+//            System.out.println(livetmpstr);
 
-            if(livetmpstr.startsWith("liveStatus") && !"liveStatus == 1".equals(livetmpstr)){
-                return ResultBean.successOf("["+uid+"]"+"该主播尚未开播");
+            if (livetmpstr.startsWith("liveStatus") && !"liveStatus == 1".equals(livetmpstr)) {
+                return ResultBean.successOf("[" + uid + "]" + "该主播尚未开播");
             }
-            if(livetmpstr.startsWith("[top]{\"ActionStatus\":\"FAIL\",") ){
-                return ResultBean.failureOf("["+uid+"]"+"该主播消息接口异常");
+            if (livetmpstr.startsWith("[top]{\"ActionStatus\":\"FAIL\",")) {
+                return ResultBean.failureOf("[" + uid + "]" + "该主播消息接口异常");
             }
 
             //直播间消息处理
@@ -57,50 +59,130 @@ public class JSUtil {
                 MessageContent messageContent = JsonUtil.jsonToBean(message.getMessageContent(), MessageContent.class);
                 System.out.println("messageType:" + message.getMessageType() + ",sendId:" + message.getSendId() + ",senderMask:" + messageContent.getSenderMask() + ",sendName:" + message.getSendName());
 
+                int messageType = message.getMessageType();
                 //统计活跃人数
                 if (message.getMessageType() != 31) {
                     activeUserCountSet.add(message.getSendId());
                     liveInfoCount.setActiveUserCount(activeUserCountSet.size());
                 }
+                switch (messageType) {
 
-                //进入直播间，统计唤醒粉丝数
-                if (message.getMessageType() == 31) {
-                    liveInfoCount.setPageviewCount(++pageviewCount);
-                    int senderMask = messageContent.getSenderMask();
-                    if (senderMask == 4 || senderMask == 5) {
-                        fansAwakeCountCountSet.add(message.getSendId());
-                        liveInfoCount.setFansAwakeCount(fansAwakeCountCountSet.size());
-                    }
-                }
-                //新增粉丝数
-                if (message.getMessageType() == 52) {
-                    liveInfoCount.setFansIncreaseCount(++fansIncreaseCount);
-                }
-                //添加购物车，统计添加购物车人数
-                if (message.getMessageType() == 54) {
-                    liveInfoCount.setAddCartCount(++addCartCount);
-                    addCartCountSet.add(message.getSendId());
-                    liveInfoCount.setAddCartPeopleCount(addCartCountSet.size());
-                }
-                //购买商品，统计购买商品人数
-                if (message.getMessageType() == 55) {
-                    liveInfoCount.setBuyGoodsCount(++buyGoodsCount);
-                    buyGoodsCountSet.add(message.getSendId());
-                    liveInfoCount.setBuyGoodPeopleCount(buyGoodsCountSet.size());
-                }
-                //弹幕
-                if (message.getMessageType() == 1) {
-                    liveInfoCount.setDanmakuCount(++danmakuCount);
-                }
-                //礼物
-                if (message.getMessageType() == 62) {
-                    liveInfoCount.setGiftCount(++giftCount);
-                }
-                //点赞
-                if (message.getMessageType() == 21) {
-                    liveInfoCount.setLikeCount(++likeCount);
+                    //进入直播间，统计唤醒粉丝数
+                    case 31:
+                        liveInfoCount.setPageviewCount(++pageviewCount);
+                        // 1-助理 4-粉丝 5-粉丝+助理 0-游客
+                        int senderMask = messageContent.getSenderMask();
+                        if (senderMask == 4 || senderMask == 5 || senderMask == 6) {
+                            fansAwakeCountCountSet.add(message.getSendId());
+                            liveInfoCount.setFansAwakeCount(fansAwakeCountCountSet.size());
+                        }
+                        if (senderMask == 6) {
+                            System.out.println(livetmpstr);
+                        }
+                        break;
+
+                    //新增粉丝数
+                    case 52:
+                        //1-截图 2-关注 3-分享
+                        if (messageContent.getType() == 2) {
+                            fansIncreaseCountSet.add(message.getSendId());
+                            liveInfoCount.setFansIncreaseCount(fansIncreaseCountSet.size());
+                        }
+                        System.out.println(livetmpstr);
+                        break;
+
+                    //添加购物车，统计添加购物车人数
+                    case 54:
+                        liveInfoCount.setAddCartCount(++addCartCount);
+                        addCartCountSet.add(message.getSendId());
+                        liveInfoCount.setAddCartPeopleCount(addCartCountSet.size());
+                        System.out.println(livetmpstr);
+                        break;
+
+                        //购买商品，统计购买商品人数
+                    case 55:
+                        liveInfoCount.setBuyGoodsCount(++buyGoodsCount);
+                        buyGoodsCountSet.add(message.getSendId());
+                        liveInfoCount.setBuyGoodPeopleCount(buyGoodsCountSet.size());
+                        System.out.println(livetmpstr);
+                        break;
+
+                        //礼物
+                    case 12:
+                        liveInfoCount.setGiftCount(++giftCount);
+                        System.out.println(livetmpstr);
+                        break;
+
+                        //弹幕
+                    case 1:
+                        liveInfoCount.setDanmakuCount(++danmakuCount);
+                        break;
+
+                        //点赞
+                    case 21:
+                        liveInfoCount.setLikeCount(++likeCount);
+                        break;
                 }
             }
+
+//                //统计活跃人数
+//                if (message.getMessageType() != 31) {
+//                    activeUserCountSet.add(message.getSendId());
+//                    liveInfoCount.setActiveUserCount(activeUserCountSet.size());
+//                }
+//
+//                //进入直播间，统计唤醒粉丝数
+//                if (message.getMessageType() == 31) {
+//                    liveInfoCount.setPageviewCount(++pageviewCount);
+//                    // 1-助理 4-粉丝 5-粉丝+助理 0-游客
+//                    int senderMask = messageContent.getSenderMask();
+//                    if (senderMask == 4 || senderMask == 5) {
+//                        fansAwakeCountCountSet.add(message.getSendId());
+//                        liveInfoCount.setFansAwakeCount(fansAwakeCountCountSet.size());
+//                    }
+//                    if (senderMask == 6) {
+//                        System.out.println(livetmpstr);
+//                    }
+//
+//                }
+//                //新增粉丝数
+//                if (message.getMessageType() == 52) {
+//                    //1-截图 2-关注 3-分享
+//                    if (messageContent.getType() == 2) {
+//                        fansIncreaseCountSet.add(message.getSendId());
+//                        liveInfoCount.setFansIncreaseCount(fansIncreaseCountSet.size());
+//                    }
+//                    System.out.println(livetmpstr);
+//                }
+//                //添加购物车，统计添加购物车人数
+//                if (message.getMessageType() == 54) {
+//                    liveInfoCount.setAddCartCount(++addCartCount);
+//                    addCartCountSet.add(message.getSendId());
+//                    liveInfoCount.setAddCartPeopleCount(addCartCountSet.size());
+//                }
+//                //购买商品，统计购买商品人数
+//                if (message.getMessageType() == 55) {
+//                    liveInfoCount.setBuyGoodsCount(++buyGoodsCount);
+//                    buyGoodsCountSet.add(message.getSendId());
+//                    liveInfoCount.setBuyGoodPeopleCount(buyGoodsCountSet.size());
+//                }
+//                //弹幕
+//                if (message.getMessageType() == 1) {
+//                    liveInfoCount.setDanmakuCount(++danmakuCount);
+//                }
+//                //礼物
+//                if (message.getMessageType() == 12) {
+//                    liveInfoCount.setGiftCount(++giftCount);
+//                    System.out.println(livetmpstr);
+//                }
+//                //点赞
+//                if (message.getMessageType() == 21) {
+//                    liveInfoCount.setLikeCount(++likeCount);
+//                }
+//                if (message.getMessageType() == 56 || message.getMessageType() == 57 || message.getMessageType() == 54) {
+//                    System.out.println(livetmpstr);
+//                }
+
 
             //在线人数记录
             if (livetmpstr.startsWith("onlineUser")) {
@@ -112,9 +194,10 @@ public class JSUtil {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 onlineUser.setTime(sdf.format(date));
                 liveInfoCount.getOnlineUserCountList().add(onlineUser);
-                liveInfoCount.setFavorCount(onlineUser.getFavorCount());
-
                 System.out.println(liveInfoCount.toString());
+                mongodbUtil.insert(liveInfoCount);
+//                liveInfoCount.setFavorCount(onlineUser.getFavorCount());
+
             }
 
             //直播结束数据统计
@@ -134,12 +217,11 @@ public class JSUtil {
             livebuffer.delete(0, livebuffer.toString().length());
         }
         System.out.println(liveInfoCount.toString());
-        return ResultBean.successOf("["+uid+"]"+"该主播直播结束",liveInfoCount);
+        return ResultBean.successOf("[" + uid + "]" + "该主播直播结束", liveInfoCount);
     }
 
 
-
-    public  static ResultBean userInfoSpider(String uid) throws IOException {
+    public static ResultBean userInfoSpider(String uid) throws IOException {
         Runtime runtime = Runtime.getRuntime();
         Process endProcess = runtime.exec("D:\\devSoft\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe --web-security=no D:\\devWorkspace\\IdeaProjects\\wsserver\\src\\main\\webapp\\info.js " + uid);
         InputStream endis = endProcess.getInputStream();
@@ -161,20 +243,21 @@ public class JSUtil {
             if (endtmpstr.startsWith("homeInfo")) {
                 userInfo = JsonUtil.jsonToBean(endtmpstr.substring(9, endtmpstr.length()), UserInfo.class);
                 //将64x64头像缩略图转化为400x400原图
-                String avatar = userInfo.getAvatar().replace("_64x64.jpg","");
+                String avatar = userInfo.getAvatar().replace("_64x64.jpg", "");
                 userInfo.setAvatar(avatar);
                 System.out.println(userInfo.toString());
             }
             endbuffer.delete(0, endbuffer.toString().length());
         }
-        return ResultBean.successOf("["+uid+"]"+"该主播信息抓取成功",userInfo);
+        return ResultBean.successOf("[" + uid + "]" + "该主播信息抓取成功", userInfo);
     }
+
     public static void main(String[] args) throws IOException {
 //        String content = phantomjsStart("19e282");
-        ResultBean resultBean = liveInfoSpider("1300k4e");
+        ResultBean resultBean = liveInfoSpider("17l389g");
         System.out.println(resultBean.getCode()+"-"+resultBean.getMessage()+"-"+resultBean.getData());
 
-        ResultBean resultBean2 = userInfoSpider("1300k4e");
+        ResultBean resultBean2 = userInfoSpider("17l389g");
         System.out.println(resultBean2.getCode()+"-"+resultBean2.getMessage()+"-"+resultBean2.getData());
 //        assert content != null;
     }
