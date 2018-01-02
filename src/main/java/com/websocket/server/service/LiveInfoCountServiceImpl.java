@@ -1,14 +1,14 @@
-package com.websocket.server;
+package com.websocket.server.service;
 
 import com.mongodb.DB;
+import com.websocket.server.bean.LiveInfoCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
@@ -16,8 +16,8 @@ import java.util.Set;
 /**
  * Created by fccc on 2017/12/29.
  */
-@Repository
-public class LiveInfoCountRepository {
+@Service
+public class LiveInfoCountServiceImpl implements LiveInfoCountService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -57,15 +57,14 @@ public class LiveInfoCountRepository {
 
     public void insert(LiveInfoCount entity) {
         this.mongoTemplate.insert(entity);
-
     }
 
-    public void update(LiveInfoCount entity) {
-        Query query = new Query();
-        query.addCriteria(new Criteria("_id").is(entity.getId()));
-        Update update = new Update();
-        update.set("uname", entity.getUname());
-        update.set("uid", entity.getUid());
-        this.mongoTemplate.updateFirst(query, update, LiveInfoCount.class);
-    }
+//    public void update(LiveInfoCount entity) {
+//        Query query = new Query();
+//        query.addCriteria(new Criteria("_id").is(entity.getId()));
+//        Update update = new Update();
+//        update.set("uname", entity.getUname());
+//        update.set("uid", entity.getUid());
+//        this.mongoTemplate.updateFirst(query, update, LiveInfoCount.class);
+//    }
 }

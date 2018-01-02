@@ -1,4 +1,4 @@
-package com.websocket.server;
+package com.websocket.server.redis;
 
 public enum RedisNamespace {
     MOGUJIE_ANCHOR_NEW("mogujie:anchor:new","新的未爬取的用户列表"),

@@ -1,4 +1,4 @@
-package com.websocket.server;
+package com.websocket.server.result;
 
 /**
  * @author halochen

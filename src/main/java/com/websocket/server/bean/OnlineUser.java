@@ -1,4 +1,4 @@
-package com.websocket.server;
+package com.websocket.server.bean;
 
 /**
  * Created by fccc on 2017/12/25.

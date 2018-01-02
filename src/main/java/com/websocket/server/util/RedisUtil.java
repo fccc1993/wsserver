@@ -1,4 +1,4 @@
-package com.websocket.server;
+package com.websocket.server.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class RedisUtil {
+public class  RedisUtil {
 	private Logger logger = LoggerFactory.getLogger(RedisUtil.class);
 
 	/**
@@ -24,8 +24,7 @@ public class RedisUtil {
 	private static long TIME_OUT = 7*24*3600;//单位为秒
 
 	@Autowired
-	private StringRedisTemplate redisTemplate;
-
+	private RedisTemplate<String, Object> redisTemplate;
 
 	@Autowired
 	private RedisTemplate<String, Object> redisJDKTemplate;
@@ -42,7 +41,7 @@ public class RedisUtil {
 	public boolean set(final String key, String value) {
 		boolean result = false;
 		try {
-			ValueOperations<String, String> operations = redisTemplate
+			ValueOperations<String, Object> operations = redisTemplate
 					.opsForValue();
 			operations.set(key, value);
 			result = true;
@@ -63,7 +62,7 @@ public class RedisUtil {
 	public boolean set(final String key, String value, Long expireTime) {
 		boolean result = false;
 		try {
-			ValueOperations<String, String> operations = redisTemplate
+			ValueOperations<String, Object> operations = redisTemplate
 					.opsForValue();
 			operations.set(key, value);
 			redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
@@ -85,7 +84,7 @@ public class RedisUtil {
 	public boolean leftPushList(final String key, Object object, Long expireTime, boolean isStringSerialize){
 		boolean result = false;
 		try {
-			ListOperations list;
+			ListOperations<String, Object> list;
 			if (isStringSerialize){
 				list = redisTemplate.opsForList();
 			}else {
@@ -174,7 +173,7 @@ public class RedisUtil {
 	public boolean addZSet(final String key, String value, int score){
 		boolean result = false;
 		try {
-			ZSetOperations<String, String> operations = redisTemplate
+			ZSetOperations<String, Object> operations = redisTemplate
 					.opsForZSet();
 			operations.add(key,value,score);
 			result = true;
@@ -185,8 +184,8 @@ public class RedisUtil {
 	}
 
 	public List reverseRangeZSet(final String key, int start, int end){
-		Set<String>objectSet = redisTemplate.opsForZSet().reverseRange(key,start,end);
-		return new ArrayList<String>(objectSet);
+		Set<Object>objectSet = redisTemplate.opsForZSet().reverseRange(key,start,end);
+		return new ArrayList<Object>(objectSet);
 	}
 
 	public int zcardZSet(final String key){
@@ -197,7 +196,7 @@ public class RedisUtil {
 	/**
 	 * 写入hash类型的缓存
 	 */
-	public boolean setHash(final String key, String field, String value) {
+	public boolean setHash(final String key,String field, String value) {
 		return setHash(key,field,value,TIME_OUT);
 	}
 
@@ -244,7 +243,7 @@ public class RedisUtil {
 	 * @return
 	 */
 	public String get(final String key) {
-		ValueOperations<String, String> operations = redisTemplate
+		ValueOperations<String, Object> operations = redisTemplate
 				.opsForValue();
 		Object obj = operations.get(key);
 		String result = (String) obj;
@@ -322,7 +321,7 @@ public class RedisUtil {
 	private boolean setNX(final String key, final String value, long expireTime) {
 		boolean result = false;
 		try {
-			ValueOperations<String, String> operations = redisTemplate
+			ValueOperations<String, Object> operations = redisTemplate
 					.opsForValue();
 			result = operations.setIfAbsent(key, value);
 			if (result && expireTime > 0){

@@ -1,8 +1,7 @@
-package com.websocket.server;
+package com.websocket.server.bean;
 
+import com.websocket.server.bean.OnlineUser;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,9 +12,6 @@ import java.util.List;
  * Created by fccc on 2017/12/26.
  */
 @Document(collection = "liveInfoCount")
-//@CompoundIndexes({
-//        @CompoundIndex(name = "uid_idx", def = "{'uid': 1, 'uname': -1}")
-//})
 public class LiveInfoCount {
     @Id
     private String id;

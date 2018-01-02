@@ -1,9 +1,11 @@
-package com.websocket.server;
+package com.websocket.server.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -18,6 +20,7 @@ import redis.clients.jedis.JedisPoolConfig;
  * @since 2017-10-23
  */
 @Configuration
+@PropertySource("classpath:config/redis.properties")
 public class RedisConfig {
     @Value("${redis.host}")
     private String host;
@@ -25,8 +28,8 @@ public class RedisConfig {
     private int port;
     @Value("${redis.password}")
     private String password;
-    @Value("${redis.pool.max-active}")
-    private int maxActive;
+    @Value("${redis.pool.max-total}")
+    private int maxTotal;
     @Value("${redis.pool.max-idle}")
     private int maxIdle;
     @Value("${redis.pool.min-idle}")
@@ -34,6 +37,11 @@ public class RedisConfig {
     @Value("${redis.pool.max-wait}")
     private int maxWait;
 
+    //@PropertySource要配合PropertySourcesPlaceholderConfigurer才能使用@Value注解.
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
@@ -42,7 +50,7 @@ public class RedisConfig {
         factory.setHostName(host);
         factory.setPort(port);
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxTotal(maxActive);
+        jedisPoolConfig.setMaxTotal(maxTotal);
         jedisPoolConfig.setMaxIdle(maxIdle);
         jedisPoolConfig.setMinIdle(minIdle);
         jedisPoolConfig.setMaxWaitMillis(maxWait);
@@ -50,12 +58,12 @@ public class RedisConfig {
         return factory;
     }
 
-//    @Bean
-//    public CacheManager cacheManager(RedisTemplate<?,?> redisTemplate) {
-//        CacheManager cacheManager = new RedisCacheManager(redisTemplate);
-//        return cacheManager;
-//
-//    }
+    @Bean
+    public CacheManager cacheManager(RedisTemplate<?,?> redisTemplate) {
+        CacheManager cacheManager = new RedisCacheManager(redisTemplate);
+        return cacheManager;
+
+    }
 
     @Bean
     public RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory factory) {
@@ -66,16 +74,8 @@ public class RedisConfig {
         RedisSerializer<String> redisSerializer = new StringRedisSerializer();//Long类型不可以会出现异常信息;
         redisTemplate.setKeySerializer(redisSerializer);
         redisTemplate.setHashKeySerializer(redisSerializer);
-//        redisTemplate.setValueSerializer(redisSerializer);
-//        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-//        ObjectMapper om = new ObjectMapper();
-//        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-//        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-//        jackson2JsonRedisSerializer.setObjectMapper(om);
-
-        JdkSerializationRedisSerializer jdkSerializationRedisSerializer = new JdkSerializationRedisSerializer();
-        redisTemplate.setValueSerializer(jdkSerializationRedisSerializer);
-        redisTemplate.setHashValueSerializer(jdkSerializationRedisSerializer);
+        redisTemplate.setValueSerializer(redisSerializer);
+        redisTemplate.setHashValueSerializer(redisSerializer);
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;

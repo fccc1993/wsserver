@@ -1,4 +1,10 @@
-package com.websocket.server;
+package com.websocket.server.util;
+
+import com.websocket.server.result.ResultBean;
+import com.websocket.server.bean.*;
+import com.websocket.server.service.LiveInfoCountService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,9 +19,12 @@ import java.util.Set;
  * Created by fccc on 2017/12/22.
  */
 
-
+@Component
 public class JSUtil {
-    public static ResultBean liveInfoSpider(String uid) throws IOException {
+    @Autowired
+    private LiveInfoCountService liveInfoCountService;
+
+    public ResultBean liveInfoSpider(String uid) throws IOException {
         Runtime runtime = Runtime.getRuntime();
         //phantomjs 和codes.js的路径之间有个空格 本代码只是测试用的绝对路径
         Process liveProcess = runtime.exec("D:\\devSoft\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe --web-security=no D:\\devWorkspace\\IdeaProjects\\wsserver\\src\\main\\webapp\\infoq.js " + uid);
@@ -37,8 +46,6 @@ public class JSUtil {
         Set<String> fansIncreaseCountSet = new HashSet<String>();
         Set<String> addCartCountSet = new HashSet<String>();
         Set<String> buyGoodsCountSet = new HashSet<String>();
-
-        MongodbUtil mongodbUtil = new MongodbUtil();
 
         String livetmp = "";
         while ((livetmp = livebr.readLine()) != null) {
@@ -195,9 +202,8 @@ public class JSUtil {
                 onlineUser.setTime(sdf.format(date));
                 liveInfoCount.getOnlineUserCountList().add(onlineUser);
                 System.out.println(liveInfoCount.toString());
-                mongodbUtil.insert(liveInfoCount);
 //                liveInfoCount.setFavorCount(onlineUser.getFavorCount());
-
+                liveInfoCountService.insert(liveInfoCount);
             }
 
             //直播结束数据统计
@@ -221,7 +227,7 @@ public class JSUtil {
     }
 
 
-    public static ResultBean userInfoSpider(String uid) throws IOException {
+    public ResultBean userInfoSpider(String uid) throws IOException {
         Runtime runtime = Runtime.getRuntime();
         Process endProcess = runtime.exec("D:\\devSoft\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe --web-security=no D:\\devWorkspace\\IdeaProjects\\wsserver\\src\\main\\webapp\\info.js " + uid);
         InputStream endis = endProcess.getInputStream();
@@ -234,10 +240,6 @@ public class JSUtil {
             endbuffer.append(endtmp);
             String endtmpstr = endbuffer.toString();
             System.out.println(endtmpstr);
-//            if (endtmpstr.startsWith("fanslike")) {
-//                PlaybackInfo playbackInfo = JsonUtil.jsonToBean(endtmpstr.substring(9, endtmpstr.length()), PlaybackInfo.class);
-//                System.out.println(playbackInfo.toString());
-//            }
 
             //获取主播主页信息
             if (endtmpstr.startsWith("homeInfo")) {
@@ -245,20 +247,11 @@ public class JSUtil {
                 //将64x64头像缩略图转化为400x400原图
                 String avatar = userInfo.getAvatar().replace("_64x64.jpg", "");
                 userInfo.setAvatar(avatar);
+
                 System.out.println(userInfo.toString());
             }
             endbuffer.delete(0, endbuffer.toString().length());
         }
         return ResultBean.successOf("[" + uid + "]" + "该主播信息抓取成功", userInfo);
-    }
-
-    public static void main(String[] args) throws IOException {
-//        String content = phantomjsStart("19e282");
-        ResultBean resultBean = liveInfoSpider("17l389g");
-        System.out.println(resultBean.getCode()+"-"+resultBean.getMessage()+"-"+resultBean.getData());
-
-        ResultBean resultBean2 = userInfoSpider("17l389g");
-        System.out.println(resultBean2.getCode()+"-"+resultBean2.getMessage()+"-"+resultBean2.getData());
-//        assert content != null;
     }
 }
