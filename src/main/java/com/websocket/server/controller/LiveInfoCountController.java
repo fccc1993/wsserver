@@ -1,5 +1,6 @@
 package com.websocket.server.controller;
 
+import com.websocket.server.producer.ProducerService;
 import com.websocket.server.producer.QueueSender;
 import com.websocket.server.redis.RedisNamespace;
 import com.websocket.server.bean.LiveInfoCount;
@@ -32,6 +33,9 @@ public class LiveInfoCountController extends BaseController{
     @Autowired
     private RedisUtil redisUtil;
 
+    @Autowired
+    private ProducerService producerService;
+
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public void test() {
         System.out.println("--------------------------------start----------------------");
@@ -51,6 +55,7 @@ public class LiveInfoCountController extends BaseController{
 
     @RequestMapping(value = "/haha", method = RequestMethod.GET)
     public String haha(){
+        producerService.sendMessage("fccc-activemq");
         return "haha";
     }
 }

@@ -21,7 +21,7 @@ public class QueueSender {
     //发送的消息数量
     private static final int SENDNUM = 10;
 
-    static {
+    public static void main(String[] args)  {
         //连接工厂
         ConnectionFactory connectionFactory;
         //连接
