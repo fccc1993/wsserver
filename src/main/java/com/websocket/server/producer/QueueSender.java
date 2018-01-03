@@ -2,6 +2,7 @@ package com.websocket.server.producer;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.junit.Test;
 import org.springframework.stereotype.Component;
 
 import javax.jms.*;

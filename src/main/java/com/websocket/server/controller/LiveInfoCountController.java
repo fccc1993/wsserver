@@ -1,5 +1,6 @@
 package com.websocket.server.controller;
 
+import com.websocket.server.producer.QueueSender;
 import com.websocket.server.redis.RedisNamespace;
 import com.websocket.server.bean.LiveInfoCount;
 import com.websocket.server.service.LiveInfoCountService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Created by fccc on 2017/12/29.
@@ -49,8 +51,6 @@ public class LiveInfoCountController extends BaseController{
 
     @RequestMapping(value = "/haha", method = RequestMethod.GET)
     public String haha(){
-        redisUtil.leftPushList(RedisNamespace.MOGUJIE_ANCHOR_CRAWLED.getKey(), "lkjiop", false);
-        System.out.println("-----------------------------haha---------------");
         return "haha";
     }
 }
