@@ -27,11 +27,11 @@ public class LiveInfoCountController extends BaseController{
 
     private Logger logger = LoggerFactory.getLogger(LiveInfoCountController.class);
 
-    @Autowired
-    private LiveInfoCountService liveInfoCountService;
-
-    @Autowired
-    private RedisUtil redisUtil;
+//    @Autowired
+//    private LiveInfoCountService liveInfoCountService;
+//
+//    @Autowired
+//    private RedisUtil redisUtil;
 
     @Autowired
     private ProducerService producerService;
@@ -44,12 +44,12 @@ public class LiveInfoCountController extends BaseController{
         entity.setUname("fccc");
         entity.setLiveId("asdfgh");
         System.out.println("----------------------------------redis--------------------------");
-        redisUtil.set(RedisNamespace.MOGUJIE_ANCHOR_CRAWLED.getKey(), "qwerty123456", 120L);
-        System.out.println("-------------------------------mongodb-------------------------");
-        liveInfoCountService.insert(entity);
-        List<LiveInfoCount> list = liveInfoCountService.findListByUname("fccc");
-        System.out.println(list.get(0).toString());
-        System.out.println("------------------"+list.size());
+//        redisUtil.set(RedisNamespace.MOGUJIE_ANCHOR_CRAWLED.getKey(), "qwerty123456", 120L);
+//        System.out.println("-------------------------------mongodb-------------------------");
+//        liveInfoCountService.insert(entity);
+//        List<LiveInfoCount> list = liveInfoCountService.findListByUname("fccc");
+//        System.out.println(list.get(0).toString());
+//        System.out.println("------------------"+list.size());
     }
 
 

@@ -8,7 +8,7 @@
 
        default-autowire="byName">
     <!-- 数据源 -->
-    <context:property-placeholder location="classpath*:config/redis.properties"
+    <context:property-placeholder location="classpath:config/redis.properties"
                                   ignore-unresolvable="true" />
 
     <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
